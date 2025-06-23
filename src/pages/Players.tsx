@@ -110,41 +110,41 @@ function CreatePlayerDialog({ teams, onPlayerCreated }: { teams: Team[], onPlaye
           <DialogTitle>Create New Player</DialogTitle>
           <DialogDescription>Fill in the details for the new player.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="playerName" className="text-right">Name</Label>
-            <Input id="playerName" name="playerName" value={formData.playerName} onChange={handleChange} className="col-span-3" />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="playerName">Name</Label>
+            <Input id="playerName" name="playerName" value={formData.playerName} onChange={handleChange} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="image" className="text-right">Image URL</Label>
-            <Input id="image" name="image" value={formData.image} onChange={handleChange} className="col-span-3" />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="image">Image URL</Label>
+            <Input id="image" name="image" value={formData.image} onChange={handleChange} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="cost" className="text-right">Cost</Label>
-            <Input id="cost" name="cost" type="number" value={formData.cost} onChange={handleChange} className="col-span-3" />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cost">Cost</Label>
+            <Input id="cost" name="cost" type="number" value={formData.cost} onChange={handleChange} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="team" className="text-right">Team</Label>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="team">Team</Label>
             <Select onValueChange={handleSelectChange} value={formData.team}>
-                <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a team" />
-                </SelectTrigger>
-                <SelectContent>
-                    {teams.map(team => (
-                        <SelectItem key={team._id} value={team._id}>{team.teamName}</SelectItem>
-                    ))}
-                </SelectContent>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a team" />
+              </SelectTrigger>
+              <SelectContent>
+                {teams.map(team => (
+                  <SelectItem key={team._id} value={team._id}>{team.teamName}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="information" className="text-right">Information</Label>
-            <Textarea id="information" name="information" value={formData.information} onChange={handleChange} className="col-span-3" />
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="information">Information</Label>
+            <Textarea id="information" name="information" value={formData.information} onChange={handleChange} />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="isCaptain" className="text-right">Captain</Label>
+          <div className="flex items-center gap-2">
             <Checkbox id="isCaptain" checked={formData.isCaptain} onCheckedChange={handleCheckboxChange} />
+            <Label htmlFor="isCaptain">Captain</Label>
           </div>
-          {error && <p className="col-span-4 text-sm text-destructive text-right">{error}</p>}
+          {error && <p className="text-sm text-destructive text-center mt-2">{error}</p>}
           <DialogFooter>
             <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Player'}</Button>
           </DialogFooter>

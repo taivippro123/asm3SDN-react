@@ -23,6 +23,7 @@ function App() {
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/auth/google/callback" element={<AuthCallback />} />
+
       </Routes>
     </BrowserRouter>
   );

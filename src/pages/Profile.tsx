@@ -11,6 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface User { _id: string; name: string; YOB: number; membername: string; isAdmin: boolean; googleId?: string; }
 
+interface CommentData {
+  playerId: string;
+  playerName: string;
+  rating: number;
+  content: string;
+  createdAt: string;
+}
+
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
@@ -28,25 +36,34 @@ export default function Profile() {
   const [passwordMessage, setPasswordMessage] = useState({ type: "", text: "" });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
+  // Comments State
+  const [comments, setComments] = useState<CommentData[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsError, setCommentsError] = useState("");
+
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchProfile = async () => {
+      setCommentsLoading(true);
+      setCommentsError("");
       try {
         const res = await fetch(`${API_URL}/auth/profile`, { credentials: "include" });
         if (!res.ok) throw new Error("Not logged in");
         const data = await res.json();
         if (data.success) {
-          const fetchedUser = data.data;
-          setUser(fetchedUser);
-          setName(fetchedUser.name);
-          setYOB(fetchedUser.YOB.toString());
+          setUser(data.data.user);
+          setName(data.data.user.name);
+          setYOB(data.data.user.YOB.toString());
+          setComments(data.data.comments || []);
         } else {
           navigate("/login");
         }
       } catch (error) {
+        setCommentsError("Failed to load comments");
         navigate("/login");
       }
+      setCommentsLoading(false);
     };
-    fetchUser();
+    fetchProfile();
   }, [navigate]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -149,6 +166,44 @@ export default function Profile() {
                     {profileLoading ? "Saving..." : "Save Changes"}
                   </Button>
                 </form>
+                {/* Comments Section */}
+                {user && !user.isAdmin && (
+                  <div className="mt-8">
+                    <h4 className="text-lg font-semibold mb-2">Your Comments for Players</h4>
+                    {commentsLoading ? (
+                      <p>Loading comments...</p>
+                    ) : comments.length === 0 ? (
+                      <p className="text-gray-500">You have not commented on any players yet.</p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full border text-sm">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="px-3 py-2 border">Player Name</th>
+                              <th className="px-3 py-2 border">Rating</th>
+                              <th className="px-3 py-2 border">Content</th>
+                              <th className="px-3 py-2 border">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {comments.map((comment, idx) => (
+                              <tr key={idx}>
+                                <td className="px-3 py-2 border">
+                                  <a href={`/players/${comment.playerId}`} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">
+                                    {comment.playerName}
+                                  </a>
+                                </td>
+                                <td className="px-3 py-2 border">{comment.rating}</td>
+                                <td className="px-3 py-2 border">{comment.content}</td>
+                                <td className="px-3 py-2 border">{new Date(comment.createdAt).toLocaleString()}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

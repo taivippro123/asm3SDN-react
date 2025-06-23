@@ -33,6 +33,9 @@ export default function PlayerDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [user, setUser] = useState<User | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [editRating, setEditRating] = useState(0);
 
   const fetchPlayer = useCallback(async () => {
     if (!id) return;
@@ -78,6 +81,61 @@ export default function PlayerDetail() {
     }
   };
 
+  // Edit comment handler
+  const handleEditClick = (comment: Comment) => {
+    setEditingCommentId(comment._id);
+    setEditContent(comment.content);
+    setEditRating(comment.rating);
+  };
+  const handleEditCancel = () => {
+    setEditingCommentId(null);
+    setEditContent("");
+    setEditRating(0);
+  };
+  const handleEditSubmit = async (e: React.FormEvent, comment: Comment) => {
+    e.preventDefault();
+    if (!editContent || editRating === 0) return;
+    try {
+      const res = await fetch(`${API_URL}/players/${player?._id}/comments/${comment._id}/edit`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content: editContent, rating: editRating })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditingCommentId(null);
+        setEditContent("");
+        setEditRating(0);
+        fetchPlayer();
+      } else {
+        alert(data.message || 'Failed to edit comment.');
+      }
+    } catch (err) {
+      alert('An error occurred.');
+    }
+  };
+  // Delete comment handler
+  const handleDeleteComment = async (comment: Comment) => {
+    try {
+      const res = await fetch(`${API_URL}/players/${player?._id}/comments/${comment._id}/delete`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchPlayer();
+      } else {
+        alert(data.message || 'Failed to delete comment.');
+      }
+    } catch (err) {
+      console.log(err);
+      alert('An error occurred.');
+    }
+  };
+
   if (loading) return <PlayerDetailSkeleton />;
   if (error || !player) return (
     <div className="min-h-screen bg-background">
@@ -85,6 +143,9 @@ export default function PlayerDetail() {
       <p className="text-center text-red-500 mt-10">{error || "Player not found."}</p>
     </div>
   );
+
+  // Check if user already commented
+  const userComment = user && player?.comments.find(c => c.author._id === user._id);
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,7 +224,8 @@ export default function PlayerDetail() {
                 <CardDescription>See what others think about this player.</CardDescription>
               </CardHeader>
               <CardContent>
-                {user && <CommentForm playerId={player._id} onCommentAdded={fetchPlayer} />}
+                {/* Only show comment form if user is member, not admin, and chưa comment */}
+                {user && !user.isAdmin && !userComment && <CommentForm playerId={player._id} onCommentAdded={fetchPlayer} />}
                 <Separator className="my-6" />
                 <div className="space-y-6">
                   {(player.comments || []).length > 0 ? (
@@ -183,16 +245,59 @@ export default function PlayerDetail() {
                             </div>
                           </div>
                           <p className="text-xs text-muted-foreground">{new Date(comment.createdAt).toLocaleDateString()}</p>
-                          <p className="mt-2 text-sm text-foreground/90">{comment.content}</p>
+                          {/* Nếu đang edit comment này */}
+                          {editingCommentId === comment._id ? (
+                            <form onSubmit={e => handleEditSubmit(e, comment)} className="mt-2 flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                {[1, 2, 3].map(val => (
+                                  <button type="button" key={val} onClick={() => setEditRating(val)} className="focus:outline-none">
+                                    <Star className={`w-5 h-5 ${editRating >= val ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/30 hover:text-yellow-300'}`} />
+                                  </button>
+                                ))}
+                              </div>
+                              <Textarea value={editContent} onChange={e => setEditContent(e.target.value)} rows={2} />
+                              <div className="flex gap-2">
+                                <Button type="submit" size="sm">Save</Button>
+                                <Button type="button" size="sm" variant="secondary" onClick={handleEditCancel}>Cancel</Button>
+                              </div>
+                            </form>
+                          ) : (
+                            <p className="mt-2 text-sm text-foreground/90">{comment.content}</p>
+                          )}
+                          {/* Nếu là member và là tác giả comment thì hiện nút Edit/Delete */}
+                          {user && !user.isAdmin && comment.author._id === user._id && editingCommentId !== comment._id && (
+                            <div className="flex gap-2 mt-2">
+                              <Button size="sm" variant="outline" onClick={() => handleEditClick(comment)}><Edit className="w-4 h-4 mr-1" />Edit</Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="destructive"><Trash2 className="w-4 h-4 mr-1" />Delete</Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this comment?
+                                      <br />
+                                      <span className="italic text-muted-foreground">"{comment.content.length > 100 ? comment.content.substring(0, 100) + '...' : comment.content}"</span>
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteComment(comment)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))
                   ) : (
                     <p className="text-center text-muted-foreground py-8">No comments yet. Be the first to share your thoughts.</p>
                   )}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
