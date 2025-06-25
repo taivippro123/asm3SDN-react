@@ -100,14 +100,14 @@ export default function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/micah/svg?seed=${user.membername}`} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={`https://api.dicebear.com/7.x/micah/svg?seed=${user.membername}`} alt={user.name || user.membername} />
+                  <AvatarFallback>{(user.name || user.membername || 'U').charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.name}</p>
+                    <p className="text-sm font-medium leading-none">{user.name || user.membername}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.membername}
                     </p>
