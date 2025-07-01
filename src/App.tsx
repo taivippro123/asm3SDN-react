@@ -9,6 +9,8 @@ import TeamDetail from "./pages/TeamDetail";
 import PlayerDetail from "./pages/PlayerDetail";
 import AuthCallback from "./pages/AuthCallback";
 import Profile from "./pages/Profile";
+import { Toaster } from "@/components/ui/sonner";
+
 function App() {
   return (
     <BrowserRouter>
@@ -23,8 +25,8 @@ function App() {
         <Route path="/accounts" element={<Accounts />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/auth/google/callback" element={<AuthCallback />} />
-
       </Routes>
+      <Toaster />
     </BrowserRouter>
   );
 }

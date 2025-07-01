@@ -204,6 +204,12 @@ export default function Players() {
     fetchPlayers();
   };
 
+  const handleClearFilters = () => {
+    setSearch("");
+    setSelectedTeam("");
+    fetchPlayers();
+  };
+
   const renderSkeletons = () => (
     Array.from({ length: 8 }).map((_, i) => (
       <Card key={i} className="overflow-hidden">
@@ -254,6 +260,7 @@ export default function Players() {
             </SelectContent>
           </Select>
           <Button onClick={handleSearchClick} className="w-full sm:w-auto">Search</Button>
+          <Button onClick={handleClearFilters} variant="outline" className="w-full sm:w-auto">Clear Filters</Button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

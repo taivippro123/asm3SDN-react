@@ -77,17 +77,17 @@ export default function Accounts() {
                     </TableRow>
                   ))
                 ) : (
-                  members.map((member) => (
+                  members.filter(member => !member.isAdmin).map((member) => (
                     <TableRow key={member._id}>
                       <TableCell className="font-medium">{member.name}</TableCell>
                       <TableCell>{member.membername}</TableCell>
                       <TableCell className="hidden md:table-cell">{member.YOB}</TableCell>
                       <TableCell>
-                        <Badge variant={member.isAdmin ? "destructive" : "outline"}>
-                          {member.isAdmin ? "Admin" : "Member"}
+                        <Badge variant={!member.isAdmin ? "default" : "destructive"}>
+                          {!member.isAdmin ? "Member" : "Admin"}
                         </Badge>
                       </TableCell>
-                       <TableCell className="hidden md:table-cell">
+                      <TableCell className="hidden md:table-cell">
                         <Badge variant="secondary">
                           {member.googleId ? "Google" : "Email"}
                         </Badge>

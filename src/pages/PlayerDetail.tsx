@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 // Interfaces
 interface Author { _id: string; name: string; membername: string; }
@@ -74,10 +75,10 @@ export default function PlayerDetail() {
       if (data.success) {
         navigate('/players');
       } else {
-        alert(data.message || 'Failed to delete player.');
+        toast.error(data.message || 'Failed to delete player.');
       }
     } catch (err) {
-      alert('An error occurred while deleting the player.');
+      toast.error('An error occurred while deleting the player.');
     }
   };
 
@@ -108,11 +109,12 @@ export default function PlayerDetail() {
         setEditContent("");
         setEditRating(0);
         fetchPlayer();
+        toast.success('Comment updated!');
       } else {
-        alert(data.message || 'Failed to edit comment.');
+        toast.error(data.message || 'Failed to edit comment.');
       }
     } catch (err) {
-      alert('An error occurred.');
+      toast.error('An error occurred.');
     }
   };
   // Delete comment handler
@@ -127,12 +129,13 @@ export default function PlayerDetail() {
       const data = await res.json();
       if (data.success) {
         fetchPlayer();
+        toast.success('Comment deleted!');
       } else {
-        alert(data.message || 'Failed to delete comment.');
+        toast.error(data.message || 'Failed to delete comment.');
       }
     } catch (err) {
       console.log(err);
-      alert('An error occurred.');
+      toast.error('An error occurred.');
     }
   };
 
@@ -470,10 +473,10 @@ function EditPlayerDialog({ player, onUpdate }: { player: Player, onUpdate: () =
         onUpdate();
         setIsOpen(false);
       } else {
-        alert(data.message || 'Failed to update player');
+        toast.error(data.message || 'Failed to update player');
       }
     } catch (err) {
-      alert('An error occurred.');
+      toast.error('An error occurred.');
     }
   };
 

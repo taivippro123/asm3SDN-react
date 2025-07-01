@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Frown } from "lucide-react";
+import { toast } from "sonner";
 
 // Interfaces
 interface Team { _id: string; teamName: string; }
@@ -36,6 +37,9 @@ export default function TeamDetail() {
 
         if (teamData.success) setTeam(teamData.data);
         if (playersData.success) setPlayers(playersData.data.players);
+        else if (playersData.message && playersData.message.includes("captain")) {
+          toast.error(playersData.message);
+        }
 
       } catch (error) {
         console.error("Failed to fetch team details", error);
